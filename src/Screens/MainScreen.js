@@ -1,24 +1,76 @@
-import { StyleSheet, Text, TextInput, View, Button, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, FlatList, Modal, Pressable } from 'react-native'
+import React, { useState } from 'react'
+import TopBar from '../Components/TopBar'
+import TaskList from '../Components/TaskList'
+import ModalTask from '../Components/Modal'
 
 const MainScreen = () => {
-  return (
-    <View style = {styles.container}>
-        <View style={styles.view1}>
-        <TextInput style={styles.input}/>
-        <TouchableOpacity 
-        style={styles.button}>
-        <Text>'Agregar tarea'</Text>
-        </TouchableOpacity>
-    </View>
-    <View style={styles.view2}>
-        <Text>'Cambiar carenado'</Text>
-    </View>
-        
-        
-    
-    </View>
-  )
+
+    const [list, setList] = useState([])
+    const [input, setInput] = useState("")
+    const [modalVisible, setModalVisible] = useState(false);
+    const [taskActive, setTaskActive] = useState({})
+
+
+    const onAddTask = () => {
+        setList([
+            ...list,
+            {
+                id: list.length + 1,
+                task: input,
+                completed: false
+            }
+        ])
+    }
+
+    const onPressTask = (task) => {
+        console.log(task)
+        setTaskActive(task)
+        setModalVisible(!modalVisible)
+    }
+
+    const onPressStatus = (status) => {
+        const remainTask = list.filter(taskList => taskList.id !== taskActive.id)
+        const orderedList = [
+            ...remainTask,
+            {
+                ...taskActive, completed: status
+            }
+        ].sort(function (a, b) {
+            if (a.id > b.id) {
+                return 1;
+            }
+            if (a.id < b.id) {
+                return -1;
+            }
+            return 0;
+        })
+        setList(orderedList)
+        setModalVisible(!modalVisible)
+    }
+
+    return (
+        <View style={styles.container}>
+            <TopBar
+                input={input}
+                onAddTask={onAddTask}
+                setInput={setInput}
+            />
+
+            <TaskList
+                list={list}
+                onPressTask={onPressTask}
+            />
+
+            <ModalTask
+                modalVisible={modalVisible}
+                setModalVisible={setModalVisible}
+                taskActive={taskActive}
+                onPressStatus={onPressStatus}
+            />
+
+        </View>
+    )
 }
 
 export default MainScreen
@@ -30,36 +82,4 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    view1: {
-        flex: 1,
-        paddingVertical: 20,
-        paddingHorizontal: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: "gray",
-        width: '100%'
-    },
-    view2: {
-        flex: 8,
-        backgroundColor: "red",
-        width: '100%',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        paddingVertical: 15
-    },
-    input: {
-        width: 150,
-        borderBottomColor: 'deepskyblue',
-        borderBottomWidth: 3,
-        marginBottom: 8
-    },
-    button: {
-        paddingHorizontal: 10,
-        width: 150
-    },
-    task: {
-        width: '80%',
-        backgroundColor: 'blue',
-        padding: 10,
-    }
 })
